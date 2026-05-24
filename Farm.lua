@@ -1,75 +1,84 @@
+-- Anti-Kick Smooth Auto Farm & Auto Quest (Level 180+)
 getgenv().AutoFarm = true
 local player = game.Players.LocalPlayer
+local Vim = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
 
--- Function bash y-sîft d-drb direct l l-server (Remote Attack - Anti-Cheat Bypass)
-local function DoDamage(enemyHumanoid)
-    pcall(function()
-        -- Sîft d-drba nish-an l l-Server bla kliker f l-shasha
-        local combatRemote = game:GetService("ReplicatedStorage").Remotes.CommF_
-        combatRemote:InvokeServer("RegisterAttack")
-        combatRemote:InvokeServer("Attack")
-    end)
+-- Anti-Idle (Bypass Kick 20 Mins)
+player.Idled:Connect(function()
+    Vim:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+    task.wait(0.1)
+    Vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+end)
+
+-- Function dyal l-mshy smooth (Anti-Kick)
+local function SmoothTween(targetCFrame)
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        local distance = (hrp.Position - targetCFrame.Position).Magnitude
+        local speed = 300 -- Sor3a safe bzzaf 3la l-Anti-cheat
+        
+        local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+        local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
+        tween:Play()
+        return tween
+    end
 end
 
--- Function dyal l-Quests automatic l level 183 (Pirate Village / Marine)
+-- Function dyal l-Mission (Pirate Village - Level 183)
 local function TakeQuest()
     pcall(function()
-        local myLevel = player.Data.Level.Value
-        local args = {}
+        -- 1. Tween smooth l 3nd l-NPC dyal l-Quest
+        local questNPCpos = CFrame.new(-1137, 4.7, 3843)
+        local walk = SmoothTween(questNPCpos)
+        if walk then walk.Completed:Wait() end
+        task.wait(0.3)
         
-        if myLevel >= 150 and myLevel < 190 then
-            -- Mission dyal Level 150-190 (Pirate Village - Brute)
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "BuggyQuest1", 2)
-        elseif myLevel >= 190 then
-            -- Mission dyal Level 190+
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "MarineQuest2", 1)
-        end
+        -- 2. Khod l-mission dyal l-Brutes direct
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "BuggyQuest1", 2)
     end)
 end
 
--- L-Boucle dyal l-Farm + Quest + Damage Direct
+-- L-Boucle dyal l-Farm & Quest
 spawn(function()
     while getgenv().AutoFarm do
         local success, err = pcall(function()
             local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") and character.Humanoid.Health > 0 then
+            if character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
                 
-                -- Check l-Quest
+                -- Check wash 3ndek mission khdama
                 local hasQuest = player.PlayerGui.Main:FindFirstChild("Quest")
                 if not hasQuest or not hasQuest.Visible then
-                    -- Teleport direct l l-NPC dyal l-Quest bash y-akhodha
-                    character.HumanoidRootPart.CFrame = CFrame.new(-1137, 5, 3843) -- Position NPC f Pirate Village
-                    task.wait(0.3)
                     TakeQuest()
                 else
-                    -- Ila 3ndek l-Quest, mshi farmi direct l-monsters
+                    -- Ila 3ndek mission, mshi l l-monsters smoothly
                     local enemies = workspace:FindFirstChild("Enemies") or workspace
-                    local foundEnemy = false
-                    
                     for _, enemy in pairs(enemies:GetChildren()) do
-                        -- Qlb 3la Brute (Monsters dyal level 180+)
-                        if (enemy.Name == "Brute" or enemy.Name == "Pirate") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                            foundEnemy = true
+                        -- Qlb 3la Brute f Pirate Village
+                        if enemy.Name == "Brute" and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
+                            
+                            -- Move to monster position
+                            local walk = SmoothTween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0))
+                            if walk then walk.Completed:Wait() end
+                            
+                            -- Attack loop
                             while getgenv().AutoFarm and enemy.Humanoid.Health > 0 and enemy.Parent and character.Humanoid.Health > 0 and hasQuest.Visible do
-                                -- Teleport safely fawq l-monster
                                 character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
                                 
-                                -- DRB DIRECT MN L-SERVER (Damage 100%)
-                                DoDamage(enemy.Humanoid)
+                                -- Send Clicks normal dyal mouse f Windows
+                                Vim:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                                task.wait(0.05)
+                                Vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
                                 
-                                task.wait(0.05) -- Fast Attack asra3 bzzaf
+                                task.wait(0.1)
                             end
                         end
-                    end
-                    
-                    -- Ila ma-lqash monsters khdamين, y-mshi l-blasa fin kay-bano
-                    if not foundEnemy then
-                        character.HumanoidRootPart.CFrame = CFrame.new(-1200, 30, 3900) -- Blasa d l-monsters
                     end
                 end
                 
             end
         end)
-        task.wait(0.3)
+        task.wait(0.5)
     end
 end)
