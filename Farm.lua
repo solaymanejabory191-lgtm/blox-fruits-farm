@@ -1,23 +1,14 @@
--- Anti-Kick Smooth Auto Farm & Auto Quest (Level 180+)
 getgenv().AutoFarm = true
 local player = game.Players.LocalPlayer
-local Vim = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
 
--- Anti-Idle (Bypass Kick 20 Mins)
-player.Idled:Connect(function()
-    Vim:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-    task.wait(0.1)
-    Vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-end)
-
--- Function dyal l-mshy smooth (Anti-Kick)
+-- Function dyal l-mshy safe (Anti-Kick)
 local function SmoothTween(targetCFrame)
     local character = player.Character
     if character and character:FindFirstChild("HumanoidRootPart") then
         local hrp = character.HumanoidRootPart
         local distance = (hrp.Position - targetCFrame.Position).Magnitude
-        local speed = 300 -- Sor3a safe bzzaf 3la l-Anti-cheat
+        local speed = 350
         
         local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
         local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
@@ -26,52 +17,58 @@ local function SmoothTween(targetCFrame)
     end
 end
 
--- Function dyal l-Mission (Pirate Village - Level 183)
+-- Function d l-Quest dyal l-Boss / Monsters l-kbar f Marine Fortress
 local function TakeQuest()
     pcall(function()
-        -- 1. Tween smooth l 3nd l-NPC dyal l-Quest
-        local questNPCpos = CFrame.new(-1137, 4.7, 3843)
-        local walk = SmoothTween(questNPCpos)
+        -- Move smooth l 3nd NPC dyal l-Quest f Marine Fortress (Level 180+)
+        local npcPos = CFrame.new(-2440, 73, 5510) 
+        local walk = SmoothTween(npcPos)
         if walk then walk.Completed:Wait() end
-        task.wait(0.3)
+        task.wait(0.4)
         
-        -- 2. Khod l-mission dyal l-Brutes direct
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "BuggyQuest1", 2)
+        -- Khod mission dyal l-monsters l-kbar (Vice Admiral / Brute Level 180+)
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "MarineQuest2", 1)
     end)
 end
 
--- L-Boucle dyal l-Farm & Quest
+-- L-Boucle dyal l-Farm Fixed
 spawn(function()
     while getgenv().AutoFarm do
         local success, err = pcall(function()
             local character = player.Character
             if character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
                 
-                -- Check wash 3ndek mission khdama
                 local hasQuest = player.PlayerGui.Main:FindFirstChild("Quest")
                 if not hasQuest or not hasQuest.Visible then
                     TakeQuest()
                 else
-                    -- Ila 3ndek mission, mshi l l-monsters smoothly
                     local enemies = workspace:FindFirstChild("Enemies") or workspace
+                    
+                    -- Qlb 3la l-Bosses wla l-monsters l-kbar dyal l-mission l-ola
                     for _, enemy in pairs(enemies:GetChildren()) do
-                        -- Qlb 3la Brute f Pirate Village
-                        if enemy.Name == "Brute" and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
+                        -- Hna fndna focus ghir 3la Vice Admiral (Boss) wla l-monsters kbar
+                        if (enemy.Name == "Vice Admiral" or enemy.Name == "Brute") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
                             
-                            -- Move to monster position
-                            local walk = SmoothTween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0))
-                            if walk then walk.Completed:Wait() end
-                            
-                            -- Attack loop
-                            while getgenv().AutoFarm and enemy.Humanoid.Health > 0 and enemy.Parent and character.Humanoid.Health > 0 and hasQuest.Visible do
-                                character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
+                            -- Ila l-level dyal l-Brute sghir (b7al level 45), bypassih ou mshi l l-kbir
+                            if enemy.Name == "Brute" and enemy.Humanoid.MaxHealth < 5000 then
+                                -- Kay-fout l-monsters sghar
+                            else
+                                -- Go to target smoothly
+                                local walk = SmoothTween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0))
+                                if walk then walk.Completed:Wait() end
                                 
-                                -- Send Clicks normal dyal mouse f Windows
-                                Vim:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-                                task.wait(0.05)
-                                Vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-                                
-                                task.wait(0.1)
+                                -- 🚨 LOCK TARGET: Bqa fih 7ta y-mot 100% 3ad t-za3za3
+                                while getgenv().AutoFarm and enemy.Humanoid.Health > 0 and enemy.Parent and character.Humanoid.Health > 0 and hasQuest.Visible do
+                                    character.HumanoidRootPart.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
+                                    
+                                    -- Tool Attack khdam directmn Roblox
+                                    local tool = character:FindFirstChildOfClass("Tool")
+                                    if tool then
+                                        tool:Activate()
+                                    end
+                                    
+                                    task.wait(0.08) -- Sor3a d-drb m9adda
+                                end
                             end
                         end
                     end
