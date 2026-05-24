@@ -1,62 +1,38 @@
--- Shari Orion Library (Khfifa ou katkhdem f mobile 100%)
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+-- Auto Farm Direct (Bla UI - Anti Crash 100%)
+getgenv().AutoFarm = true
 
-local Window = OrionLib:MakeWindow({
-    Name = "Blox Fruits: Auto Farm", 
-    HidePremium = false, 
-    SaveConfig = true, 
-    ConfigFolder = "OrionTest"
-})
-
--- Variables
-local _G = getgenv and getgenv() or _G
-_G.AutoFarm = false
-
--- Function Auto Clicker
+local player = game.Players.LocalPlayer
 local VirtualUser = game:GetService("VirtualUser")
-game:GetService("Players").LocalPlayer.Idled:Connect(function()
+
+-- Auto Clicker
+player.Idled:Connect(function()
     VirtualUser:Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
 
--- Tab dyal l-farm
-local FarmTab = Window:MakeTab({
-    Name = "Auto Farm",
-    Icon = "rbxassetid://4483362458",
-    PremiumOnly = false
-})
-
--- Bouton Toggle
-FarmTab:AddToggle({
-    Name = "Auto Farm All Enemies",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoFarm = Value
-        
-        spawn(function()
-            while _G.AutoFarm do
-                pcall(function()
-                    local player = game.Players.LocalPlayer
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local hrp = character:WaitForChild("HumanoidRootPart")
+-- L-boucle dyal l-farm
+spawn(function()
+    while getgenv().AutoFarm do
+        pcall(function()
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+            
+            -- Qlb 3la أقرب monster f l-lo3ba
+            for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
                     
-                    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                        if enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy:FindFirstChild("HumanoidRootPart") then
-                            while _G.AutoFarm and enemy.Humanoid.Health > 0 and enemy.Parent do
-                                hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
-                                
-                                -- Auto Click
-                                VirtualUser:CaptureController()
-                                VirtualUser:ClickButton1(Vector2.new(0,0))
-                                
-                                task.wait(0.1)
-                            end
-                        end
+                    while getgenv().AutoFarm and enemy.Humanoid.Health > 0 and enemy.Parent do
+                        -- Teleport fawq l-monster safely
+                        hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
+                        
+                        -- Attack
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton1(Vector2.new(0,0))
+                        
+                        task.wait(0.1)
                     end
-                end)
-                task.wait(1)
+                end
             end
         end)
-    end    
-})
-
-OrionLib:Init()
+        task.wait(1)
+    end
+end)
